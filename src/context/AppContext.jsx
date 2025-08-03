@@ -2,6 +2,7 @@ import { createContext,useEffect,useState } from "react";
 import React from 'react';
 import { dummyCourses } from "../assets/assets";
 import { useNavigate } from "react-router-dom";
+import humanizeDuration from "humanize-duration";
 
 export const AppContext= createContext()
 
@@ -25,13 +26,38 @@ export const AppContextProvider =(props)=>{
 
         }
 
+        //fuction to calculate course chapter time 
+        const calculateChapterTime=(chapter)=>{
+            let time=0
+            chapter.chapterContent.map((lecture)=>time+=lecture.lectureDuration)
+            return humanizeDuration(time*60*1000,{units:['h','m']})
+        }
+
+        //function to calculate the course details
+        const calculateCourseDuration =(course)=>{
+            let time=0
+            course.courseContent.map((chapter)=>chapter.chapterContent.map((lecture)=>time+=lecture.lectureDuration))
+            return humanizeDuration(time*60*1000,{units:['h','m']})
+        }
+
+        //function to calculate to no of lecturse in the course
+        const caculateNoOfLectures=(course)=>{
+            let totallLectures=0;
+            course.courseContent.forEach(chapter=>{
+                if(Array.isArray(chapter.chapterContent)){
+                    totallLectures+=chapter.chapterContent.length
+                }
+            })
+            return totallLectures;
+        }
+
     useEffect(() => {
         fetchAllCourses()
     },[])
 
     const value={
         currency,allCourses,navigate,calculateRating,
-        isEducator,setIsEducator
+        isEducator,setIsEducator,calculateChapterTime,caculateNoOfLectures,calculateCourseDuration
 
 
     }

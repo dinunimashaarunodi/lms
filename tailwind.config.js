@@ -15,7 +15,17 @@ export default {
       },
       gridTemplateColumns: {
         'auth': 'repeat(auto-fit, minmax(200px, 1fr))'
+      },
+      spacing: {  // <-- added colon here
+        'section-height': '500px',  // fixed spelling: 'section-height'
+      },
+      maxWidth:{
+        'course-card':'424px'
+      },
+      boxSadow:{
+        'costom-card':'0px 4px 15px 2px rgba(0,0,0,0,1)'
+      }
     },
   },
-  plugins: [],
-}}
+  plugins: [],  // moved this outside 'theme'
+}
