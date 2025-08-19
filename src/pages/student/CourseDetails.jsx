@@ -6,6 +6,8 @@ import { useParams } from "react-router-dom";
 import Loading from "../../components/students/Loading";
 import { assets } from "../../assets/assets";
 import humanizeDuration from 'humanize-duration';
+import Footer from '../../components/students/Footer';
+import YouTube from 'react-youtube';
 
 const CourseDetails = () => {
 
@@ -13,8 +15,10 @@ const CourseDetails = () => {
   const {id}=useParams()
   const [courseData,setCourseData] = useState(null);
   const [openSection,setOpenSection] = useState({});
+  const [isAlreadyEnrolled,setIsAlreadyEnrolled] = useState(false);
+  const [playerData,setPlayerData]=useState(null)
 
-  const {allCourses,calculateRating,calculateChapterTime,caculateNoOfLectures,calculateCourseDuration,currency} = useContext(AppContext);
+  const {allCourses,calculateRating,calculateChapterTime,calculateNoOfLectures,calculateCourseDuration,currency} = useContext(AppContext);
   const fetchCourseData =async ()=>{
     const findCourse =allCourses.find(course=>course._id==id)
     setCourseData(findCourse);
@@ -22,7 +26,7 @@ const CourseDetails = () => {
 
   useEffect(()=>{
     fetchCourseData();
-  },[])
+  },[allCourses])
 
   const toggleSection = (index) => {
     setOpenSection((prev) => ({
@@ -72,7 +76,7 @@ const CourseDetails = () => {
                             <div className='flex items-center justify-between w-full text-gray-800 text-xs md:text-default'>
                             <p>{lecture.lectureTitle}</p>
                             <div className='flex gap 2'>
-                              {lecture.isPreviewFree && <p className='text-blue-500 cursor-pointer'>Preview</p>}
+                              {lecture.isPreviewFree && <p onClick={()=>setPlayerData({videoId:lecture.lectureUrl.split('/').pop()})} className='text-blue-500 cursor-pointer'>Preview</p>}
                               <p>{humanizeDuration( lecture.lectureDuration* 60 *1000,{units:['h','m']})}</p>
                             </div>
                             </div>
@@ -95,7 +99,8 @@ const CourseDetails = () => {
 
       {/* right column */}
       <div className='max-w-course-card z-10 shadow-custom-card rounded-t md:rounded-none overflow-hidden mg-white min-w-[300px] sm:min-w-[420px]'>
-        <img src={courseData.courseThumbnail} alt='course thumbnail' className='w-96 h-60 object-cover rounded-lg shadow-lg mb-6'/>
+            {playerData?<YouTube videoId={playerData.videoId} opts={{playerVars:{autoplay:1}}} iframeClassName='w-full aspect-video'/>:<img src={courseData.courseThumbnail} alt='course thumbnail' className='w-96 h-60 object-cover rounded-lg shadow-lg mb-6'/>}
+        
         <div className='p-5'>
           <div className='flex item-center gap-2'>
             <img src={assets.time_left_clock_icon} alt='time left clock icon' className='w-3.5'/>
@@ -116,13 +121,28 @@ const CourseDetails = () => {
               <img src={assets.time_clock_icon} alt='clock icon'/>
               <p>{calculateCourseDuration(courseData)}</p>
             </div>
+            <div className='h-4 w-px bg-gray-500/40'></div>
+              <div className='flex items-center gap-1'>
+                <img src={assets.lesson_icon} alt='clock icon'/>
+                <p>{calculateNoOfLectures(courseData)} lessons</p>
+              </div>
+            </div>
+            <button className='md:mt-6 mt-4 w-full py-3 rounded bg-blue-600 text-white font-medium'>{isAlreadyEnrolled?'Already Enrolled':'Enroll Now'}</button>
+            <div className='pt-6'>
+              <p className='md:text-xl text-lg font-medium text-gray-800'> what's in the course?</p>
+              <ul className='ml-4 pt-2 text-sm md:text-default list-disc text-gray-500'>
+                <li>Lifetime access with free updates.</li>
+                <li>Step-by-step,hands-on project guidance.</li>
+                <li>Downloadable resources and sourse code</li>
+                <li>Quizees to test your knowladege.</li>
+                <li>Certificate of completion</li>
+              </ul>
+            </div>
 
           </div>
-
         </div>
-
       </div>
-    </div>
+    <Footer/>
 
     </>
   ) :<Loading/>
